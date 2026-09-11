@@ -78,12 +78,11 @@ function roomOptions(){
 
 function teacherOptions(){
   const room=document.getElementById("room")?.value||"";
-  const currentTeacher=document.getElementById("teacher")?.value||"";
 
-  return `<option value="" ${currentTeacher?"":"selected"} disabled>เลือกผู้เบิก...</option>`+
+  return `<option value="" selected disabled>เลือกผู้เบิก...</option>`+
     TEACHERS
       .filter(t=>t.room===room)
-      .map(t=>`<option value="${esc(t.id)}" ${t.id===currentTeacher?"selected":""}>${esc(t.name)} — ${esc(t.room)}</option>`)
+      .map(t=>`<option value="${esc(t.id)}">${esc(t.name)} - ${esc(t.room)}</option>`)
       .join("");
 }
 function openForm(code){selectedItem=STOCK.find(x=>x.code===code);qty=1;workType="งานห้อง";renderForm();overlay.classList.remove("hidden");}
