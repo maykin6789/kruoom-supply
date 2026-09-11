@@ -68,12 +68,22 @@ function renderItemsAll(q){
 const list=STOCK.filter(x=>x.name.toLowerCase().includes(q)||x.code.toLowerCase().includes(q));
 items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-name">${esc(x.name)}</div><div class="item-code">รหัส: ${esc(x.code)}</div><div class="item-cat">${esc(x.category)}</div></div><button class="req" onclick='openForm(${JSON.stringify(x.code)})'>เบิก</button></div>`).join(""):`<div class="empty">ไม่พบรายการที่ค้นหา</div>`;
 }
-function roomOptions(){return [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))].map(r=>`<option>${esc(r)}</option>`).join("");}
+function roomOptions(){
+  const currentRoom=document.getElementById("room")?.value||"";
+
+  return [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))]
+    .map(r=>`<option value="${esc(r)}" ${r===currentRoom?"selected":""}>${esc(r)}</option>`)
+    .join("");
+}
+
 function teacherOptions(){
   const room=document.getElementById("room")?.value||"";
-  return `<option value="" selected disabled>เลือกผู้เบิก...</option>`+
-    TEACHERS.filter(t=>t.room===room)
-      .map(t=>`<option value="${esc(t.id)}">${esc(t.name)} — ${esc(t.room)}</option>`)
+  const currentTeacher=document.getElementById("teacher")?.value||"";
+
+  return `<option value="" ${currentTeacher?"":"selected"} disabled>เลือกผู้เบิก...</option>`+
+    TEACHERS
+      .filter(t=>t.room===room)
+      .map(t=>`<option value="${esc(t.id)}" ${t.id===currentTeacher?"selected":""}>${esc(t.name)} — ${esc(t.room)}</option>`)
       .join("");
 }
 function openForm(code){selectedItem=STOCK.find(x=>x.code===code);qty=1;workType="งานห้อง";renderForm();overlay.classList.remove("hidden");}
