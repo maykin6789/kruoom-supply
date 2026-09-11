@@ -98,7 +98,15 @@ sheet.innerHTML=`<div class="sheet-head"><div><h2>ยืนยันการเ
 function setWorkType(v){workType=v;renderForm()}
 function changeQty(n){qty=Math.max(1,qty+n);renderForm()}
 function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
-function changeRoom(){renderForm()}
+function changeRoom(){
+  const room=document.getElementById("room").value;
+  const teacher=document.getElementById("teacher");
+
+  if(teacher){
+    teacher.value="";
+    teacher.innerHTML=teacherOptions();
+  }
+}
 async function confirmReq(){
   const teacher=TEACHERS.find(t=>t.id===$("teacher").value);
 
