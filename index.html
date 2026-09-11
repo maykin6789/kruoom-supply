@@ -69,11 +69,10 @@ const list=STOCK.filter(x=>x.name.toLowerCase().includes(q)||x.code.toLowerCase(
 items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-name">${esc(x.name)}</div><div class="item-code">รหัส: ${esc(x.code)}</div><div class="item-cat">${esc(x.category)}</div></div><button class="req" onclick='openForm(${JSON.stringify(x.code)})'>เบิก</button></div>`).join(""):`<div class="empty">ไม่พบรายการที่ค้นหา</div>`;
 }
 function roomOptions(){
-  const currentRoom=document.getElementById("room")?.value||"";
-
-  return [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))]
-    .map(r=>`<option value="${esc(r)}" ${r===currentRoom?"selected":""}>${esc(r)}</option>`)
-    .join("");
+  return `<option value="" selected disabled>เลือกห้องเรียน...</option>`+
+    [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))]
+      .map(r=>`<option value="${esc(r)}">${esc(r)}</option>`)
+      .join("");
 }
 
 function teacherOptions(){
