@@ -107,7 +107,7 @@ function changeRoom(){
   }
 }
 async function confirmReq(){
-  const teacher=TEACHERS.find(t=>t.id===$("teacher").value);
+  const teacher=TEACHERS.find(t=>String(t.id)===String($("teacher").value));
 
 if(!teacher){
   alert("กรุณาเลือกผู้เบิกก่อนยืนยันการเบิก");
