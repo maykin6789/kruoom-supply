@@ -69,17 +69,23 @@ const list=STOCK.filter(x=>x.name.toLowerCase().includes(q)||x.code.toLowerCase(
 items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-name">${esc(x.name)}</div><div class="item-code">รหัส: ${esc(x.code)}</div><div class="item-cat">${esc(x.category)}</div></div><button class="req" onclick='openForm(${JSON.stringify(x.code)})'>เบิก</button></div>`).join(""):`<div class="empty">ไม่พบรายการที่ค้นหา</div>`;
 }
 function roomOptions(){return [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))].map(r=>`<option>${esc(r)}</option>`).join("");}
-function teacherOptions(){return TEACHERS.map(t=>`<option value="${esc(t.id)}">${esc(t.name)} — ${esc(t.room)}</option>`).join("");}
+function teacherOptions(){
+  const room=document.getElementById("room")?.value||"";
+  return TEACHERS.filter(t=>t.room===room).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} — ${esc(t.room)}</option>`).join("");
+}
 function openForm(code){selectedItem=STOCK.find(x=>x.code===code);qty=1;workType="งานห้อง";renderForm();overlay.classList.remove("hidden");}
 function renderForm(){
 sheet.innerHTML=`<div class="sheet-head"><div><h2>ยืนยันการเบิก</h2><div class="item-code">เลือกแล้ว: ${esc(selectedItem.name)}</div></div><button class="close" onclick="closeModal()">×</button></div>
 <div class="field"><div class="label">ประเภทงาน</div><div class="choice"><button class="${workType==="งานส่วนกลาง"?"active":""}" onclick="setWorkType('งานส่วนกลาง')">งานส่วนกลาง</button><button class="${workType==="งานห้อง"?"active":""}" onclick="setWorkType('งานห้อง')">งานห้อง</button></div></div>
 <div class="field"><div class="label">จำนวน</div><div class="qty"><button onclick="changeQty(-1)">−</button><input id="qtyInput" type="number" min="1" value="${qty}" onchange="setQty(this.value)"><button onclick="changeQty(1)">+</button></div></div>
-<div class="field"><div class="label">ห้อง</div><select id="room">${roomOptions()}</select></div>
+<div class="field"><div class="label">ห้อง</div><select id="room" onchange="changeRoom()">${roomOptions()}</select></div>
 <div class="field"><div class="label">ผู้เบิก</div><select id="teacher">${teacherOptions()}</select></div>
 <button class="confirm" onclick="confirmReq()">ยืนยันการเบิก</button>`;
 }
-function setWorkType(v){workType=v;renderForm()} function changeQty(n){qty=Math.max(1,qty+n);renderForm()} function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
+function setWorkType(v){workType=v;renderForm()}
+function changeQty(n){qty=Math.max(1,qty+n);renderForm()}
+function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
+function changeRoom(){renderForm()}
 async function confirmReq(){
   const teacher=TEACHERS.find(t=>t.id===$("teacher").value)||TEACHERS[0];
   const room=$("room").value;
