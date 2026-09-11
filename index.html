@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>KRUOOM | ระบบเบิกพัสดุ</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 520px;
+      margin: auto;
+      min-height: 100vh;
+      background: #ffffff;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #174a7e, #2469a8);
+      color: white;
+      padding: 28px 22px 24px;
+      border-radius: 0 0 24px 24px;
+    }
+
+    .brand {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      font-size: 14px;
+      opacity: .9;
+    }
+
+    .welcome {
+      margin-top: 22px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 22px 18px 40px;
+    }
+
+    .section-title {
+      font-size: 19px;
+      font-weight: 750;
+      margin-bottom: 14px;
+    }
+
+    /* SEARCH */
+    .search {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #dbe2ea;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 20px;
+      background: #f8fafc;
+    }
+
+    .search:focus {
+      border-color: #2877b8;
+      background: white;
+    }
+
+    /* CATEGORY */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .category {
+      border: none;
+      background: #f3f7fb;
+      border-radius: 18px;
+      padding: 22px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .category:hover {
+      transform: translateY(-2px);
+      background: #e9f2fb;
+    }
+
+    .category-icon {
+      font-size: 30px;
+      margin-bottom: 12px;
+    }
+
+    .category-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .category-count {
+      margin-top: 4px;
+      color: #6b7787;
+      font-size: 13px;
+    }
+
+    /* ITEMS */
+    .hidden {
+      display: none;
+    }
+
+    .back {
+      border: none;
+      background: transparent;
+      color: #2469a8;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 0;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item {
+      border: 1px solid #e3e8ef;
+      border-radius: 16px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: white;
+    }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+
+    .item-code {
+      color: #8993a1;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .request-btn {
+      flex-shrink: 0;
+      border: none;
+      background: #2469a8;
+      color: white;
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* MODAL */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px 28px;
+      animation: slideUp .2s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .selected-item {
+      background: #f2f6fa;
+      padding: 14px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin: 14px 0 7px;
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d6dee8;
+      border-radius: 12px;
+      font-size: 16px;
+      background: white;
+    }
+
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantity button {
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      background: #eaf1f7;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .quantity input {
+      text-align: center;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .cancel-btn,
+    .confirm-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 13px;
+      font-size: 16px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      background: #edf0f3;
+      color: #4b5563;
+    }
+
+    .confirm-btn {
+      background: #2469a8;
+      color: white;
+    }
+
+    /* RECEIPT */
+    .receipt {
+      position: fixed;
+      inset: 0;
+      background: #f4f7fb;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .receipt-card {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      border-radius: 22px;
+      padding: 28px 22px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.1);
+    }
+
+    .receipt-success {
+      text-align: center;
+      font-size: 45px;
+    }
+
+    .receipt-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 10px;
+    }
+
+    .receipt-subtitle {
+      text-align: center;
+      color: #687386;
+      margin-top: 4px;
+      margin-bottom: 24px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 11px 0;
+      border-bottom: 1px dashed #d9dfe6;
+      font-size: 14px;
+    }
+
+    .receipt-row span:first-child {
+      color: #687386;
+    }
+
+    .receipt-row span:last-child {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .close-receipt {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: none;
+      border-radius: 13px;
+      background: #2469a8;
+      color: white;
+      font-size: 16px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 30px 0;
+      }
+
+      .app {
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 8px 35px rgba(0,0,0,.08);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="header">
+    <div class="brand">KRUOOM</div>
+    <div class="subtitle">ระบบเบิกพัสดุออนไลน์</div>
+    <div class="welcome">สวัสดีครับ 👋</div>
+  </header>
+
+  <main class="content">
+
+    <!-- CATEGORY SCREEN -->
+    <section id="categoryScreen">
+
+      <div class="section-title">เลือกหมวดพัสดุ</div>
+
+      <input
+        class="search"
+        id="searchInput"
+        type="search"
+        placeholder="ค้นหาพัสดุ..."
+        oninput="searchItems()"
+      >
+
+      <div class="categories">
+
+        <button class="category" onclick="openCategory('สำนักงาน')">
+          <div class="category-icon">📁</div>
+          <div class="category-name">สำนักงาน</div>
+          <div class="category-count">พัสดุสำนักงาน</div>
+        </button>
+
+        <button class="category" onclick="openCategory('การเรียนการสอน')">
+          <div class="category-icon">📚</div>
+          <div class="category-name">การเรียนการสอน</div>
+          <div class="category-count">อุปกรณ์การเรียน</div>
+        </button>
+
+        <button class="category" onclick="openCategory('ทำความสะอาด')">
+          <div class="category-icon">🧹</div>
+          <div class="category-name">ทำความสะอาด</div>
+          <div class="category-count">วัสดุทำความสะอาด</div>
+        </button>
+
+        <button class="category" onclick="openCategory('อื่นๆ')">
+          <div class="category-icon">📦</div>
+          <div class="category-name">อื่นๆ</div>
+          <div class="category-count">พัสดุอื่นๆ</div>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ITEM SCREEN -->
+    <section id="itemScreen" class="hidden">
+
+      <button class="back" onclick="backToCategories()">
+        ← กลับไปเลือกหมวด
+      </button>
+
+      <div class="section-title" id="categoryTitle">
+        พัสดุ
+      </div>
+
+      <input
+        class="search"
+        id="itemSearch"
+        type="search"
+        placeholder="ค้นหารายการ..."
+        oninput="filterItems()"
+      >
+
+      <div class="items" id="itemList"></div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- REQUEST MODAL -->
+<div id="requestModal" class="overlay hidden">
+
+  <div class="modal">
+
+    <div class="modal-title">เบิกพัสดุ</div>
+
+    <div class="selected-item" id="selectedItem">
+      -
+    </div>
+
+    <label>ประเภทงาน</label>
+
+    <select id="workType">
+      <option value="งานส่วนกลาง">งานส่วนกลาง</option>
+      <option value="งานห้อง">งานห้อง</option>
+    </select>
+
+    <label>จำนวน</label>
+
+    <div class="quantity">
+
+      <button onclick="changeQuantity(-1)">−</button>
+
+      <input
+        id="quantity"
+        type="number"
+        value="1"
+        min="1"
+      >
+
+      <button onclick="changeQuantity(1)">+</button>
+
+    </div>
+
+    <label>ห้อง</label>
+
+    <select id="room">
+      <option>ห้อง 101</option>
+      <option>ห้อง 102</option>
+      <option>ห้อง 103</option>
+    </select>
+
+    <label>ครูผู้เบิก</label>
+
+    <select id="teacher">
+      <option>ครูอุ้ม</option>
+      <option>ครูสมชาย</option>
+      <option>ครูสุดา</option>
+    </select>
+
+    <div class="modal-buttons">
+
+      <button
+        class="cancel-btn"
+        onclick="closeModal()"
+      >
+        ยกเลิก
+      </button>
+
+      <button
+        class="confirm-btn"
+        onclick="confirmRequest()"
+      >
+        ยืนยันการเบิก
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- RECEIPT -->
+<div id="receipt" class="receipt hidden">
+
+  <div class="receipt-card">
+
+    <div class="receipt-success">✅</div>
+
+    <div class="receipt-title">
+      เบิกพัสดุสำเร็จ
+    </div>
+
+    <div class="receipt-subtitle">
+      บันทึกรายการเรียบร้อยแล้ว
+    </div>
+
+    <div class="receipt-row">
+      <span>เลขที่รายการ</span>
+      <span id="receiptId">KRU-000001</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>เวลา</span>
+      <span id="receiptTime">-</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>ประเภทงาน</span>
+      <span id="receiptWork">-</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>รายการ</span>
+      <span id="receiptItem">-</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>จำนวน</span>
+      <span id="receiptQuantity">-</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>ห้อง</span>
+      <span id="receiptRoom">-</span>
+    </div>
+
+    <div class="receipt-row">
+      <span>ผู้เบิก</span>
+      <span id="receiptTeacher">-</span>
+    </div>
+
+    <button
+      class="close-receipt"
+      onclick="closeReceipt()"
+    >
+      เสร็จสิ้น
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  const items = [
+
+    {
+      code: "OFF-001",
+      name: "กระดาษ A4",
+      category: "สำนักงาน"
+    },
+
+    {
+      code: "OFF-002",
+      name: "ปากกาลูกลื่น",
+      category: "สำนักงาน"
+    },
+
+    {
+      code: "OFF-003",
+      name: "ดินสอ",
+      category: "สำนักงาน"
+    },
+
+    {
+      code: "OFF-004",
+      name: "ยางลบ",
+      category: "สำนักงาน"
+    },
+
+    {
+      code: "EDU-001",
+      name: "กระดาษสี",
+      category: "การเรียนการสอน"
+    },
+
+    {
+      code: "EDU-002",
+      name: "สีไม้",
+      category: "การเรียนการสอน"
+    },
+
+    {
+      code: "EDU-003",
+      name: "กาว",
+      category: "การเรียนการสอน"
+    },
+
+    {
+      code: "CLN-001",
+      name: "น้ำยาทำความสะอาด",
+      category: "ทำความสะอาด"
+    },
+
+    {
+      code: "CLN-002",
+      name: "ไม้กวาด",
+      category: "ทำความสะอาด"
+    },
+
+    {
+      code: "CLN-003",
+      name: "ถุงขยะ",
+      category: "ทำความสะอาด"
+    },
+
+    {
+      code: "OTH-001",
+      name: "วัสดุอื่นๆ",
+      category: "อื่นๆ"
+    }
+
+  ];
+
+
+  let currentCategory = "";
+  let selectedItem = null;
+
+
+  function openCategory(category) {
+
+    currentCategory = category;
+
+    document
+      .getElementById("categoryScreen")
+      .classList
+      .add("hidden");
+
+    document
+      .getElementById("itemScreen")
+      .classList
+      .remove("hidden");
+
+    document
+      .getElementById("categoryTitle")
+      .textContent = category;
+
+    document
+      .getElementById("itemSearch")
+      .value = "";
+
+    renderItems(
+      items.filter(item => item.category === category)
+    );
+  }
+
+
+  function backToCategories() {
+
+    document
+      .getElementById("itemScreen")
+      .classList
+      .add("hidden");
+
+    document
+      .getElementById("categoryScreen")
+      .classList
+      .remove("hidden");
+  }
+
+
+  function renderItems(list) {
+
+    const container =
+      document.getElementById("itemList");
+
+    container.innerHTML = "";
+
+    if (list.length === 0) {
+
+      container.innerHTML =
+        "<p style='color:#7b8794;padding:20px 0'>ไม่พบรายการพัสดุ</p>";
+
+      return;
+    }
+
+
+    list.forEach(item => {
+
+      const div =
+        document.createElement("div");
+
+      div.className = "item";
+
+      div.innerHTML = `
+
+        <div>
+          <div class="item-name">
+            ${item.name}
+          </div>
+
+          <div class="item-code">
+            ${item.code}
+          </div>
+        </div>
+
+        <button
+          class="request-btn"
+          onclick="openRequest('${item.code}')"
+        >
+          เบิก
+        </button>
+
+      `;
+
+      container.appendChild(div);
+
+    });
+
+  }
+
+
+  function filterItems() {
+
+    const keyword =
+      document
+        .getElementById("itemSearch")
+        .value
+        .toLowerCase();
+
+    const filtered =
+      items.filter(item =>
+        item.category === currentCategory &&
+        (
+          item.name.toLowerCase().includes(keyword) ||
+          item.code.toLowerCase().includes(keyword)
+        )
+      );
+
+    renderItems(filtered);
+  }
+
+
+  function searchItems() {
+
+    const keyword =
+      document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    if (!keyword) return;
+
+    const results =
+      items.filter(item =>
+        item.name.toLowerCase().includes(keyword)
+      );
+
+    if (results.length > 0) {
+
+      currentCategory = results[0].category;
+
+      document
+        .getElementById("categoryScreen")
+        .classList
+        .add("hidden");
+
+      document
+        .getElementById("itemScreen")
+        .classList
+        .remove("hidden");
+
+      document
+        .getElementById("categoryTitle")
+        .textContent = "ผลการค้นหา";
+
+      renderItems(results);
+
+    }
+
+  }
+
+
+  function openRequest(code) {
+
+    selectedItem =
+      items.find(item => item.code === code);
+
+    document
+      .getElementById("selectedItem")
+      .textContent =
+        selectedItem.name;
+
+    document
+      .getElementById("quantity")
+      .value = 1;
+
+    document
+      .getElementById("requestModal")
+      .classList
+      .remove("hidden");
+  }
+
+
+  function closeModal() {
+
+    document
+      .getElementById("requestModal")
+      .classList
+      .add("hidden");
+  }
+
+
+  function changeQuantity(amount) {
+
+    const input =
+      document.getElementById("quantity");
+
+    let value =
+      parseInt(input.value) || 1;
+
+    value += amount;
+
+    if (value < 1) value = 1;
+
+    input.value = value;
+  }
+
+
+  function confirmRequest() {
+
+    const quantity =
+      parseInt(
+        document.getElementById("quantity").value
+      ) || 1;
+
+    const work =
+      document.getElementById("workType").value;
+
+    const room =
+      document.getElementById("room").value;
+
+    const teacher =
+      document.getElementById("teacher").value;
+
+    const now =
+      new Date();
+
+    const time =
+      now.toLocaleString("th-TH");
+
+    document.getElementById("receiptId")
+      .textContent =
+      "KRU-" +
+      String(
+        Math.floor(Math.random() * 999999)
+      ).padStart(6, "0");
+
+    document.getElementById("receiptTime")
+      .textContent = time;
+
+    document.getElementById("receiptWork")
+      .textContent = work;
+
+    document.getElementById("receiptItem")
+      .textContent = selectedItem.name;
+
+    document.getElementById("receiptQuantity")
+      .textContent = quantity + " ชิ้น";
+
+    document.getElementById("receiptRoom")
+      .textContent = room;
+
+    document.getElementById("receiptTeacher")
+      .textContent = teacher;
+
+    closeModal();
+
+    document
+      .getElementById("receipt")
+      .classList
+      .remove("hidden");
+  }
+
+
+  function closeReceipt() {
+
+    document
+      .getElementById("receipt")
+      .classList
+      .add("hidden");
+  }
+
+</script>
+
+</body>
+</html>
