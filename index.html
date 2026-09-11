@@ -80,13 +80,71 @@ sheet.innerHTML=`<div class="sheet-head"><div><h2>ยืนยันการเ
 <button class="confirm" onclick="confirmReq()">ยืนยันการเบิก</button>`;
 }
 function setWorkType(v){workType=v;renderForm()} function changeQty(n){qty=Math.max(1,qty+n);renderForm()} function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
-function confirmReq(){
-const teacher=TEACHERS.find(t=>t.id===$("teacher").value)||TEACHERS[0],room=$("room").value,now=new Date(),pad=n=>String(n).padStart(2,"0");
-const timestamp=`${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()+543} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-const logId="KRU-"+String(Math.floor(Math.random()*999999)+1).padStart(6,"0");
-sheet.innerHTML=`<div class="receipt"><div class="ok">✓</div><h2>เบิกพัสดุสำเร็จ</h2><div class="receipt-sub">บันทึกรายการเรียบร้อยแล้ว</div>
-<div class="row"><span>เลขที่รายการ</span><b>${logId}</b></div><div class="row"><span>เวลา</span><b>${timestamp}</b></div><div class="row"><span>ประเภทงาน</span><b>${esc(workType)}</b></div><div class="row"><span>รายการ</span><b>${esc(selectedItem.name)}</b></div><div class="row"><span>จำนวน</span><b>${qty}</b></div><div class="row"><span>ห้อง</span><b>${esc(room)}</b></div><div class="row"><span>ผู้เบิก</span><b>${esc(teacher.name)}</b></div>
-<button class="done" onclick="closeModal()">เสร็จสิ้น</button><div class="note">⚠️ ตอนนี้เป็นโหมดทดสอบ รายการยังไม่ถูกเขียนลง Excel<br>ขั้นถัดไปเราจะต่อระบบบันทึกจริง</div></div>`;
+async function confirmReq(){
+  const teacher=TEACHERS.find(t=>t.id===$("teacher").value)||TEACHERS[0];
+  const room=$("room").value;
+
+  const confirmButton=document.querySelector(".confirm");
+  if(confirmButton){
+    confirmButton.disabled=true;
+    confirmButton.textContent="กำลังบันทึก...";
+    confirmButton.style.opacity=".65";
+  }
+
+  try{
+    const response=await fetch("https://kruoom-api.maykin6789.workers.dev/api/requisition",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        workType:workType,
+        itemCode:selectedItem.code,
+        itemName:selectedItem.name,
+        quantity:qty,
+        room:room,
+        teacher:teacher.name,
+        teacherId:String(teacher.id),
+        category:selectedItem.category,
+        note:""
+      })
+    });
+
+    const result=await response.json();
+
+    if(!response.ok || !result.ok){
+      throw new Error(result.error || result.message || "ไม่สามารถบันทึกข้อมูลได้");
+    }
+
+    sheet.innerHTML=`
+      <div class="receipt">
+        <div class="ok">✓</div>
+        <h2>เบิกพัสดุสำเร็จ</h2>
+        <div class="receipt-sub">บันทึกรายการลง Excel เรียบร้อยแล้ว</div>
+
+        <div class="row"><span>เลขที่รายการ</span><b>${esc(result.logId)}</b></div>
+        <div class="row"><span>เวลา</span><b>${esc(result.timestamp)}</b></div>
+        <div class="row"><span>ประเภทงาน</span><b>${esc(workType)}</b></div>
+        <div class="row"><span>รายการ</span><b>${esc(selectedItem.name)}</b></div>
+        <div class="row"><span>จำนวน</span><b>${qty}</b></div>
+        <div class="row"><span>ห้อง</span><b>${esc(room)}</b></div>
+        <div class="row"><span>ผู้เบิก</span><b>${esc(teacher.name)}</b></div>
+
+        <button class="done" onclick="closeModal()">เสร็จสิ้น</button>
+        <div class="note">บันทึกข้อมูลลง Excel แล้ว • แถวที่ ${result.excelRow}</div>
+      </div>`;
+
+  }catch(error){
+    console.error(error);
+
+    sheet.innerHTML=`
+      <div class="receipt">
+        <div class="ok" style="background:#fff0f0;color:#c62828">!</div>
+        <h2>บันทึกไม่สำเร็จ</h2>
+        <div class="receipt-sub">${esc(error.message)}</div>
+        <button class="done" onclick="renderForm()">ลองใหม่</button>
+      </div>`;
+  }
 }
 function closeModal(){overlay.classList.add("hidden")}
 overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal()});
