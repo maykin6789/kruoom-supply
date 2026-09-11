@@ -71,7 +71,10 @@ items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main
 function roomOptions(){return [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))].map(r=>`<option>${esc(r)}</option>`).join("");}
 function teacherOptions(){
   const room=document.getElementById("room")?.value||"";
-  return TEACHERS.filter(t=>t.room===room).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} — ${esc(t.room)}</option>`).join("");
+  return `<option value="" selected disabled>เลือกผู้เบิก...</option>`+
+    TEACHERS.filter(t=>t.room===room)
+      .map(t=>`<option value="${esc(t.id)}">${esc(t.name)} — ${esc(t.room)}</option>`)
+      .join("");
 }
 function openForm(code){selectedItem=STOCK.find(x=>x.code===code);qty=1;workType="งานห้อง";renderForm();overlay.classList.remove("hidden");}
 function renderForm(){
@@ -87,7 +90,12 @@ function changeQty(n){qty=Math.max(1,qty+n);renderForm()}
 function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
 function changeRoom(){renderForm()}
 async function confirmReq(){
-  const teacher=TEACHERS.find(t=>t.id===$("teacher").value)||TEACHERS[0];
+  const teacher=TEACHERS.find(t=>t.id===$("teacher").value);
+
+if(!teacher){
+  alert("กรุณาเลือกผู้เบิกก่อนยืนยันการเบิก");
+  return;
+}
   const room=$("room").value;
 
   const confirmButton=document.querySelector(".confirm");
