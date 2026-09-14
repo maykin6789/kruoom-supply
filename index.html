@@ -634,257 +634,236 @@ function esc(s){
 
 
 /* ============================================================
+   API HELPERS
+   ============================================================ */
+
+function apiUrl(path){
+  return `${API}${path}${path.includes("?") ? "&" : "?"}_=${Date.now()}`;
+}
+
+async function fetchJson(path, label){
+  const url = apiUrl(path);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+
+  try{
+    const response = await fetch(url, {
+      method:"GET",
+      mode:"cors",
+      credentials:"omit",
+      cache:"no-store",
+      signal:controller.signal
+    });
+
+    const text = await response.text();
+    let data = null;
+
+    try{
+      data = text ? JSON.parse(text) : null;
+    }catch(parseError){
+      throw new Error(
+        `${label}: เซิร์ฟเวอร์ตอบกลับไม่ใช่ JSON (HTTP ${response.status})`
+      );
+    }
+
+    if(!response.ok){
+      throw new Error(
+        `${label}: HTTP ${response.status}` +
+        (data?.error ? ` — ${data.error}` : "")
+      );
+    }
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error || `${label}: API ตอบกลับว่าไม่สำเร็จ`
+      );
+    }
+
+    return data;
+  }catch(error){
+    if(error?.name === "AbortError"){
+      throw new Error(`${label}: หมดเวลารอ API (15 วินาที)`);
+    }
+
+    if(error instanceof TypeError){
+      throw new Error(
+        `${label}: เชื่อมต่อ API ไม่ได้ (${error.message || "Failed to fetch"})\n` +
+        `URL: ${url}`
+      );
+    }
+
+    throw error;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+/* ============================================================
    LOAD TEACHERS FROM EXCEL
    ============================================================ */
 
 async function loadTeachers(){
-
-  const response =
-    await fetch(
-      `${API}/api/teachers?_=${Date.now()}`,
-      {
-        method:"GET",
-        cache:"no-store",
-        headers:{
-          "Cache-Control":"no-cache"
-        }
-      }
-    );
-
-  if(!response.ok){
-
-    throw new Error(
-      "โหลดรายชื่อครูจาก Excel ไม่สำเร็จ"
-    );
-
-  }
-
-  const data =
-    await response.json();
-
-  if(!data.ok){
-
-    throw new Error(
-      data.error ||
-      "โหลดรายชื่อครูไม่สำเร็จ"
-    );
-
-  }
+  const data = await fetchJson(
+    "/api/teachers",
+    "รายชื่อครู"
+  );
 
   TEACHERS =
     Array.isArray(data.teachers)
       ? data.teachers
       : [];
 
+  return TEACHERS;
 }
-
 
 /* ============================================================
    LOAD STOCK FROM EXCEL
    ============================================================ */
 
 async function loadStock(){
-
-  const response =
-    await fetch(
-      `${API}/api/stock?_=${Date.now()}`,
-      {
-        method:"GET",
-        cache:"no-store",
-        headers:{
-          "Cache-Control":"no-cache"
-        }
-      }
-    );
-
-  if(!response.ok){
-
-    throw new Error(
-      "โหลดรายการ Stock จาก Excel ไม่สำเร็จ"
-    );
-
-  }
-
-  const data =
-    await response.json();
-
-  if(!data.ok){
-
-    throw new Error(
-      data.error ||
-      "โหลด Stock ไม่สำเร็จ"
-    );
-
-  }
+  const data = await fetchJson(
+    "/api/stock",
+    "รายการ Stock"
+  );
 
   STOCK =
     Array.isArray(data.stock)
       ? data.stock
       : [];
 
-  categories =
-    [
-      ...new Set(
-        STOCK
-          .map(x => x.category)
-          .filter(Boolean)
-      )
-    ];
+  categories = [
+    ...new Set(
+      STOCK
+        .map(x => x.category)
+        .filter(Boolean)
+    )
+  ];
 
+  return STOCK;
 }
-
 
 /* ============================================================
    REFRESH ALL DATA
    ============================================================ */
 
 async function refreshData(manual = false){
-
   if(refreshBtn){
-
     refreshBtn.disabled = true;
-
     refreshBtn.textContent =
       "⏳ กำลังอ่านข้อมูลจาก Excel...";
-
   }
 
   if(syncStatus){
-
     syncStatus.textContent =
       "กำลังอัปเดตข้อมูลจาก Excel...";
-
   }
 
-  try{
+  let stockError = null;
+  let teachersError = null;
 
-    await Promise.all([
+  try{
+    const results = await Promise.allSettled([
       loadTeachers(),
       loadStock()
     ]);
 
+    if(results[0].status === "rejected"){
+      teachersError = results[0].reason;
+      console.error("TEACHERS API", teachersError);
+    }
+
+    if(results[1].status === "rejected"){
+      stockError = results[1].reason;
+      console.error("STOCK API", stockError);
+    }
+
+    /*
+     * Stock เป็นข้อมูลหลักของหน้าแรก
+     * ถ้า Stock มาได้ ให้แสดงหน้าเว็บต่อได้แม้ Teachers จะมีปัญหา
+     */
+    if(stockError){
+      throw stockError;
+    }
+
     renderCategories();
 
     if(currentCategory){
-
-      if(
-        categories.includes(
-          currentCategory
-        )
-      ){
-
+      if(categories.includes(currentCategory)){
         renderItems();
-
       }else{
-
         currentCategory = null;
-
         home.classList.remove("hidden");
-
         itemsSection.classList.add("hidden");
-
         backBtn.style.display = "none";
-
       }
-
     }
 
-    if(
-      !overlay.classList.contains("hidden")
-    ){
-
+    if(!overlay.classList.contains("hidden")){
       if(selectedItem){
-
-        const latest =
-          STOCK.find(
-            x =>
-              x.code === selectedItem.code
-          );
+        const latest = STOCK.find(
+          x => x.code === selectedItem.code
+        );
 
         if(latest){
-
           selectedItem = latest;
-
           renderForm();
-
         }else{
-
           closeModal();
-
         }
-
       }
-
     }
 
     if(syncStatus){
-
-      const now =
-        new Date();
-
+      const now = new Date();
       syncStatus.textContent =
-        "✓ ข้อมูลจาก Excel อัปเดตแล้ว • " +
-        now.toLocaleTimeString(
-          "th-TH",
-          {
-            hour:"2-digit",
-            minute:"2-digit"
-          }
-        );
+        teachersError
+          ? "✓ สต็อกอัปเดตแล้ว • ⚠️ รายชื่อครูมีปัญหา"
+          : "✓ ข้อมูลจาก Excel อัปเดตแล้ว • " +
+            now.toLocaleTimeString("th-TH", {
+              hour:"2-digit",
+              minute:"2-digit"
+            });
+    }
 
+    if(teachersError){
+      console.warn(
+        "โหลด Stock สำเร็จ แต่โหลด Teachers ไม่สำเร็จ:",
+        teachersError
+      );
     }
 
   }catch(error){
-
-    console.error(
-      "LIVE EXCEL SYNC",
-      error
-    );
+    console.error("LIVE EXCEL SYNC", error);
 
     if(syncStatus){
-
       syncStatus.textContent =
         "⚠️ เชื่อมต่อ Excel ไม่สำเร็จ";
-
     }
 
-    if(
-      STOCK.length === 0
-    ){
-
+    if(STOCK.length === 0){
       $("categories").innerHTML =
         `<div class="empty">
           ไม่สามารถโหลดข้อมูลพัสดุได้
           <br><br>
           ${esc(error.message)}
         </div>`;
-
     }
 
     if(manual){
-
       alert(
         "อัปเดตข้อมูลไม่สำเร็จ\n\n" +
         error.message
       );
-
     }
 
   }finally{
-
     if(refreshBtn){
-
       refreshBtn.disabled = false;
-
       refreshBtn.textContent =
         "🔄 รีเฟรชข้อมูลจาก Excel";
-
     }
-
   }
-
 }
-
 
 /* ============================================================
    CATEGORIES
