@@ -5,196 +5,1866 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#165a8a">
 <title>KRUOOM | ระบบเบิกพัสดุ</title>
+
 <style>
-:root{--blue:#165a8a;--blue2:#287db2;--bg:#f4f7fa;--card:#fff;--text:#183247;--muted:#71808d;--line:#e4ebf1;--green:#15945a}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;background:var(--bg);color:var(--text)}
-.app{max-width:760px;margin:auto;min-height:100vh}.header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:22px 18px 18px;box-shadow:0 3px 15px #123b5525}
-.brand{font-size:28px;font-weight:900;letter-spacing:.5px}.subtitle{opacity:.9;font-size:14px;margin-top:2px}
-.search{margin-top:16px;background:#fff;border-radius:14px;display:flex;align-items:center;padding:0 14px;box-shadow:0 3px 12px #123b5520}.search span{font-size:20px}.search input{border:0;outline:0;width:100%;padding:13px 10px;color:var(--text);background:transparent}
-.content{padding:18px}.section-title{font-size:18px;font-weight:800;margin:4px 0 12px}.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
-.cat{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 2px 8px #1832470b;transition:.15s}.cat:hover{transform:translateY(-1px);box-shadow:0 5px 15px #18324714}
-.cat .icon{font-size:26px}.cat .name{font-weight:800;margin-top:7px}.cat .count{font-size:12px;color:var(--muted);margin-top:3px}
-.back{display:none;border:0;background:#fff;border-radius:12px;padding:9px 13px;margin-bottom:12px;cursor:pointer;color:var(--blue);font-weight:800}
-.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;align-items:center;gap:12px}
-.item-main{flex:1;min-width:0}.item-name{font-weight:750;line-height:1.35}.item-code{font-size:11px;color:var(--muted);margin-top:4px}.item-cat{font-size:11px;color:var(--blue);margin-top:3px}
-.req{border:0;background:var(--blue);color:#fff;border-radius:11px;padding:10px 13px;font-weight:800;cursor:pointer;white-space:nowrap}.empty{text-align:center;color:var(--muted);padding:35px 10px}.hidden{display:none!important}
-.overlay{position:fixed;inset:0;background:#0b1e2d88;z-index:30;display:flex;align-items:flex-end;justify-content:center}.sheet{width:min(760px,100%);background:#fff;border-radius:22px 22px 0 0;padding:20px 18px 24px;max-height:92vh;overflow:auto}
-.sheet-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.sheet h2{margin:0;font-size:21px}.close{border:0;background:#eef3f7;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px}
-.field{margin-top:15px}.label{font-size:13px;font-weight:800;margin-bottom:7px}.choice{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-weight:750;cursor:pointer}.choice button.active{border:2px solid var(--blue);background:#eef7fd;color:var(--blue)}
-.qty{display:flex;align-items:center;gap:10px}.qty button{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:#f5f7f9;font-size:22px;cursor:pointer}.qty input{width:80px;text-align:center;height:42px;border:1px solid var(--line);border-radius:12px;outline:none}
-select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}.confirm{width:100%;margin-top:20px;border:0;border-radius:13px;background:var(--green);color:#fff;padding:14px;font-weight:900;font-size:16px;cursor:pointer}
-.receipt{padding:12px 2px 4px}.ok{width:54px;height:54px;border-radius:50%;background:#e6f8ef;color:var(--green);display:grid;place-items:center;font-size:30px;margin:2px auto 10px}.receipt h2{text-align:center;margin:0}.receipt-sub{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 15px}
-.row{display:flex;justify-content:space-between;gap:15px;border-bottom:1px dashed #d7e0e7;padding:10px 0;font-size:14px}.row b{text-align:right}.done{width:100%;border:0;border-radius:13px;background:var(--blue);color:#fff;padding:14px;font-weight:900;margin-top:18px;cursor:pointer}.note{font-size:12px;color:var(--muted);margin-top:14px;text-align:center;line-height:1.5}
-@media(min-width:650px){.categories{grid-template-columns:repeat(3,1fr)}}
-</style>
-</head>
-<body>
-<div class="app">
-<header class="header">
-<div class="brand">KRUOOM</div><div class="subtitle">ระบบเบิกพัสดุออนไลน์</div>
-<div class="search"><span>⌕</span><input id="search" placeholder="ค้นหาพัสดุ..." autocomplete="off"></div>
-</header>
-<main class="content">
-<button class="back" id="backBtn">← กลับไปหมวดหมู่</button>
-<section id="home"><div class="section-title">เลือกหมวดหมู่</div><div class="categories" id="categories"></div></section>
-<section id="itemsSection" class="hidden"><div class="section-title" id="listTitle">รายการพัสดุ</div><div class="list" id="items"></div></section>
-<div class="note">ระบบเบิกพัสดุใช้แล้วหมดไป<br>Develop by Mekin</div>
-</main></div>
-<div class="overlay hidden" id="overlay"><div class="sheet" id="sheet"></div></div>
-
-<script>
-const STOCK=[{"code": "A001", "name": "กระดาษ A4 สีขาว", "category": "กระดาษแผ่นเล็ก"}, {"code": "A002", "name": "กระดาษ A4 สีชมพู", "category": "กระดาษแผ่นเล็ก"}, {"code": "A003", "name": "กระดาษ A4 สีส้ม", "category": "กระดาษแผ่นเล็ก"}, {"code": "A004", "name": "กระดาษ A4 สีเหลือง", "category": "กระดาษแผ่นเล็ก"}, {"code": "A005", "name": "กระดาษ A4 สีเขียว", "category": "กระดาษแผ่นเล็ก"}, {"code": "A006", "name": "กระดาษโฟโต้ (ขนาด A4)", "category": "กระดาษแผ่นเล็ก"}, {"code": "A007", "name": "กระดาษ A4 (ขนาดเล็ก)", "category": "กระดาษแผ่นเล็ก"}, {"code": "A008", "name": "กระดาษการ์ด สีขาว", "category": "กระดาษแผ่นเล็ก"}, {"code": "A009", "name": "กระดาษการ์ด สีฟ้า", "category": "กระดาษแผ่นเล็ก"}, {"code": "A010", "name": "กระดาษการ์ด สีชมพู", "category": "กระดาษแผ่นเล็ก"}, {"code": "A011", "name": "กระดาษ Post it (เล็ก)", "category": "กระดาษแผ่นเล็ก"}, {"code": "A012", "name": "กระดาษ Post it (ใหญ่)", "category": "กระดาษแผ่นเล็ก"}, {"code": "B001", "name": "กระดาษอ่อน เทา-ขาว", "category": "กระดาษแผ่นใหญ่"}, {"code": "B002", "name": "กระดาษแข็ง สี", "category": "กระดาษแผ่นใหญ่"}, {"code": "B003", "name": "กระดาษอ่อน ส้ม", "category": "กระดาษแผ่นใหญ่"}, {"code": "B004", "name": "กระดาษอ่อน ชมพู", "category": "กระดาษแผ่นใหญ่"}, {"code": "B005", "name": "กระดาษอ่อน น้ำเงิน", "category": "กระดาษแผ่นใหญ่"}, {"code": "B006", "name": "กระดาษอ่อน แดง", "category": "กระดาษแผ่นใหญ่"}, {"code": "B007", "name": "กระดาษอ่อน ม่วง", "category": "กระดาษแผ่นใหญ่"}, {"code": "B008", "name": "กระดาษอ่อน ดำ", "category": "กระดาษแผ่นใหญ่"}, {"code": "B009", "name": "กระดาษอ่อน เขียวอ่อน", "category": "กระดาษแผ่นใหญ่"}, {"code": "B010", "name": "กระดาษอ่อน เหลือง", "category": "กระดาษแผ่นใหญ่"}, {"code": "B011", "name": "กระดาษอ่อน ฟ้า", "category": "กระดาษแผ่นใหญ่"}, {"code": "B012", "name": "กระดาษอ่อน น้ำตาล", "category": "กระดาษแผ่นใหญ่"}, {"code": "B013", "name": "กระดาษน้ำตาล", "category": "กระดาษแผ่นใหญ่"}, {"code": "B014", "name": "กระดาษคาฟ", "category": "กระดาษแผ่นใหญ่"}, {"code": "B015", "name": "กระดาษสา", "category": "กระดาษแผ่นใหญ่"}, {"code": "B016", "name": "กระดาษแก้ว", "category": "กระดาษแผ่นใหญ่"}, {"code": "B017", "name": "กระดาษอ่อน สีเขียวเข้ม", "category": "กระดาษแผ่นใหญ่"}, {"code": "B018", "name": "กระดาษแข็ง เทา-ขาว", "category": "กระดาษแผ่นใหญ่"}, {"code": "B019", "name": "กระดาษลัง", "category": "กระดาษแผ่นใหญ่"}, {"code": "B020", "name": "กระดาษลัง (เศษ) ขนาดฝ่ามือ นับ 1 ชิ้น", "category": "กระดาษแผ่นใหญ่"}, {"code": "B021", "name": "กระดาษอ่อน สีส้ม", "category": "กระดาษแผ่นใหญ่"}, {"code": "B023", "name": "กระดาษอ่อนสีชมพูเข้ม", "category": "กระดาษแผ่นใหญ่"}, {"code": "C001", "name": "เทปสี ติดพื้น", "category": "สก็อตเทป กาว"}, {"code": "C002", "name": "เทปใส ม้วนเล็ก", "category": "สก็อตเทป กาว"}, {"code": "C003", "name": "เทปใส ขนาดกลาง ", "category": "สก็อตเทป กาว"}, {"code": "C004", "name": "เทปใส ขนาดใหญ่", "category": "สก็อตเทป กาว"}, {"code": "C005", "name": "เทป นิตโต้ (เหนียวพิเศษ)", "category": "สก็อตเทป กาว"}, {"code": "C006", "name": "กาวเหนียว 2 หน้า", "category": "สก็อตเทป กาว"}, {"code": "C007", "name": "กาว 2 หน้าแบบบาง", "category": "สก็อตเทป กาว"}, {"code": "C008", "name": "กาว 2 หน้าแบบหนา", "category": "สก็อตเทป กาว"}, {"code": "C009", "name": "เทปแล็คซีน", "category": "สก็อตเทป กาว"}, {"code": "C010", "name": "เทปกันลื่น", "category": "สก็อตเทป กาว"}, {"code": "C011", "name": "กาวลาเท็ค", "category": "สก็อตเทป กาว"}, {"code": "C012", "name": "กาวแท่ง (เล็ก)", "category": "สก็อตเทป กาว"}, {"code": "C013", "name": "กาวแท่ง (ใหญ่)", "category": "สก็อตเทป กาว"}, {"code": "C014", "name": "กาวตราช้าง", "category": "สก็อตเทป กาว"}, {"code": "C015", "name": "กาวใส", "category": "สก็อตเทป กาว"}, {"code": "D001", "name": "ลูกแม็ก (เบอร์ 10)", "category": "แม็ก"}, {"code": "D002", "name": "ลูกแม็ก (เบอร์ 8)", "category": "แม็ก"}, {"code": "D003", "name": "ลูกแม็ก (ขนาดปกติ)", "category": "แม็ก"}, {"code": "D004", "name": "ลูกแม็กยิงบอร์ด (ขนาดใหญ่)", "category": "แม็ก"}, {"code": "E001", "name": "เมจิก (สีดำ) ", "category": "ดินสอ ปากกา สี"}, {"code": "E002", "name": "เมจิก (สีน้ำเงิน) ", "category": "ดินสอ ปากกา สี"}, {"code": "E003", "name": "เมจิก (สีแดง) ", "category": "ดินสอ ปากกา สี"}, {"code": "E004", "name": "ดินสอแท่งเล็ก", "category": "ดินสอ ปากกา สี"}, {"code": "E005", "name": "ดินสอแท่งใหญ่", "category": "ดินสอ ปากกา สี"}, {"code": "E006", "name": "สีเทียน", "category": "ดินสอ ปากกา สี"}, {"code": "E007", "name": "สีไม้แท่งยาว", "category": "ดินสอ ปากกา สี"}, {"code": "E008", "name": "ปากกาสีน้ำเงิน", "category": "ดินสอ ปากกา สี"}, {"code": "E009", "name": "ปากกาสีแดง", "category": "ดินสอ ปากกา สี"}, {"code": "E010", "name": "กบเหลาดินสอ", "category": "ดินสอ ปากกา สี"}, {"code": "E011", "name": "ยางลบ", "category": "ดินสอ ปากกา สี"}, {"code": "E012", "name": "สีน้ำ แบบขวด (สีแดง)", "category": "ดินสอ ปากกา สี"}, {"code": "E013", "name": "สีน้ำ แบบขวด (สีเขียว)", "category": "ดินสอ ปากกา สี"}, {"code": "E014", "name": "สีน้ำ แบบขวด (สีเหลือง)", "category": "ดินสอ ปากกา สี"}, {"code": "E015", "name": "สีน้ำ แบบขวด (สีฟ้า)", "category": "ดินสอ ปากกา สี"}, {"code": "E016", "name": "สีน้ำ แบบขวด (สีน้ำเงิน)", "category": "ดินสอ ปากกา สี"}, {"code": "E017", "name": "สีน้ำ แบบขวด (สีชมพู)", "category": "ดินสอ ปากกา สี"}, {"code": "E018", "name": "สีผสมอาหาร (สีแดง)", "category": "ดินสอ ปากกา สี"}, {"code": "E019", "name": "สีผสมอาหาร (สีเหลือง)", "category": "ดินสอ ปากกา สี"}, {"code": "E020", "name": "สีผสมอาหาร (สีเขียว)", "category": "ดินสอ ปากกา สี"}, {"code": "E021", "name": "สีถัง (เขียว)", "category": "ดินสอ ปากกา สี"}, {"code": "E022", "name": "สีถัง (ขาว)", "category": "ดินสอ ปากกา สี"}, {"code": "E023", "name": "สีถัง (ดำ)", "category": "ดินสอ ปากกา สี"}, {"code": "E024", "name": "สีถัง (เหลือง)", "category": "ดินสอ ปากกา สี"}, {"code": "E025", "name": "สีถัง (แดง)", "category": "ดินสอ ปากกา สี"}, {"code": "E026", "name": "สีถัง (น้ำเงิน)", "category": "ดินสอ ปากกา สี"}, {"code": "E027", "name": "ด้ามจับดินสอ", "category": "ดินสอ ปากกา สี"}, {"code": "F001", "name": "คลิปหนีบกระดาษแบบ 2 ขา (เล็ก)", "category": "คลิปหนีบกระดาษ"}, {"code": "F002", "name": "คลิปหนีบกระดาษแบบ 2 ขา (กลาง)", "category": "คลิปหนีบกระดาษ"}, {"code": "F003", "name": "คลิปหนีบกระดาษแบบ 2 ขา (ใหญ่)", "category": "คลิปหนีบกระดาษ"}, {"code": "F004", "name": "คลิปหนีบกระดาษขาเดียว", "category": "คลิปหนีบกระดาษ"}, {"code": "G001", "name": "จานกระดาษแข็ง (เล็ก)", "category": "จาน ถ้วย"}, {"code": "G002", "name": "จานกระดาษแข็ง (กลาง)", "category": "จาน ถ้วย"}, {"code": "G003", "name": "จานกระดาษแข็ง (ใหญ่)", "category": "จาน ถ้วย"}, {"code": "G004", "name": "จานกระดาษลายการ์ตูน", "category": "จาน ถ้วย"}, {"code": "G005", "name": "ถ้วยคัพเค้กกระดาษ", "category": "จาน ถ้วย"}, {"code": "H001", "name": "แก้วพลาสติก ขาว แบบอ่อน (เล็ก)", "category": "แก้วพลาสติก"}, {"code": "H002", "name": "แก้วพลาสติก ขาว แบบอ่อน (กลาง)", "category": "แก้วพลาสติก"}, {"code": "H003", "name": "แก้วพลาสติก ขาว แบบอ่อน (ใหญ่)", "category": "แก้วพลาสติก"}, {"code": "H004", "name": "แก้วพลาสติก ใส แบบอ่อน (เล็ก)", "category": "แก้วพลาสติก"}, {"code": "H005", "name": "แก้วพลาสติก ใส แบบอ่อน (กลาง)", "category": "แก้วพลาสติก"}, {"code": "H006", "name": "แก้วพลาสติก ใส แบบอ่อน (ใหญ่)", "category": "แก้วพลาสติก"}, {"code": "H007", "name": "แก้วกระดาษแบบกรวย", "category": "แก้วพลาสติก"}, {"code": "H008", "name": "แก้วพลาสติกใส แบบแข็ง (เล็ก)", "category": "แก้วพลาสติก"}, {"code": "H009", "name": "แก้วพลาสติกใส แบบแข็ง (กลาง)", "category": "แก้วพลาสติก"}, {"code": "H010", "name": "แก้วพลาสติกใส แบบแข็ง (ใหญ๋)", "category": "แก้วพลาสติก"}, {"code": "I001", "name": "แผ่นเคลือบ/Laminating", "category": "ซอง ใส้แฟ้ม"}, {"code": "I002", "name": "ซองใส เอกสาร", "category": "ซอง ใส้แฟ้ม"}, {"code": "I003", "name": "ใส้แฟ้ม แบบมีรูข้าง", "category": "ซอง ใส้แฟ้ม"}, {"code": "I004", "name": "ซองจดหมายสีขาว", "category": "ซอง ใส้แฟ้ม"}, {"code": "I005", "name": "ซองน้ำตาล A4", "category": "ซอง ใส้แฟ้ม"}, {"code": "I006", "name": "แผ่นใสห่อปก", "category": "ซอง ใส้แฟ้ม"}, {"code": "J001", "name": "น้ำยาล้างจาน (ขวด)", "category": "ทำความสะอาด"}, {"code": "J002", "name": "น้ำยาล้างจาน (ซอง)", "category": "ทำความสะอาด"}, {"code": "J003", "name": "ผงซักฟอก", "category": "ทำความสะอาด"}, {"code": "J004", "name": "น้ำยาถูกพื้น", "category": "ทำความสะอาด"}, {"code": "J005", "name": "เดทตอล/Dettol", "category": "ทำความสะอาด"}, {"code": "J006", "name": "น้ำยาเช็ดกระจก", "category": "ทำความสะอาด"}, {"code": "J007", "name": "ผ้าเช็ดอุปกรณ์", "category": "ทำความสะอาด"}, {"code": "J008", "name": "ไม้กวาด", "category": "ทำความสะอาด"}, {"code": "J009", "name": "ไม้ถูกพื้น", "category": "ทำความสะอาด"}, {"code": "J010", "name": "ถุงขยะ (เล็ก)", "category": "ทำความสะอาด"}, {"code": "J011", "name": "ถุงขยะ (กลาง) สำหรับห้องเรียน", "category": "ทำความสะอาด"}, {"code": "J012", "name": "ถุงขยะ (ใหญ่) สำหรับครัว", "category": "ทำความสะอาด"}, {"code": "J013", "name": "น้ำยาล้างมือ", "category": "ทำความสะอาด"}, {"code": "K001", "name": "ถ่าน 2A", "category": "ทั่วไป"}, {"code": "K002", "name": "ถ่าน 3A", "category": "ทั่วไป"}, {"code": "K003", "name": "หวี", "category": "ทั่วไป"}, {"code": "K004", "name": "ยางมัดผม", "category": "ทั่วไป"}, {"code": "K005", "name": "น้ำหอม (แคนตาลูป)", "category": "ทั่วไป"}, {"code": "K006", "name": "หมึกเติมทเครื่องปริ้น (แดง)", "category": "ทั่วไป"}, {"code": "K007", "name": "หมึกเติมทเครื่องปริ้น (ส้ม)", "category": "ทั่วไป"}, {"code": "K008", "name": "หมึกเติมทเครื่องปริ้น (ฟ้า)", "category": "ทั่วไป"}, {"code": "K009", "name": "หมึกเติมทเครื่องปริ้น (ดำ)", "category": "ทั่วไป"}, {"code": "K010", "name": "หมึกเติมทเครื่องปริ้น (เหลือง)", "category": "ทั่วไป"}, {"code": "K011", "name": "โฟมกันเหลี่ยมมุม", "category": "ทั่วไป"}, {"code": "K012", "name": "สมุดเช็คเงินสด (เล็ก)", "category": "ทั่วไป"}, {"code": "K013", "name": "สมุดเช็คเงินสด (ใหญ่)", "category": "ทั่วไป"}, {"code": "K014", "name": "ไม้ลูกชิ้น", "category": "ทั่วไป"}, {"code": "K015", "name": "ตะเกียบ", "category": "ทั่วไป"}, {"code": "K016", "name": "คัตตอนบัด", "category": "ทั่วไป"}, {"code": "K017", "name": "สำลีก้อน", "category": "ทั่วไป"}, {"code": "K018", "name": "เมล็ดพันธ์ุผัก", "category": "ทั่วไป"}, {"code": "K019", "name": "เมล็ดถั่วเขียว", "category": "ทั่วไป"}, {"code": "K020", "name": "เมล็ดข้าวโพด", "category": "ทั่วไป"}, {"code": "K021", "name": "เมล็ดทานตะวัน", "category": "ทั่วไป"}, {"code": "K022", "name": "พลาสติกซีลโต๊ะ", "category": "ทั่วไป"}, {"code": "K023", "name": "เชือกฟาง", "category": "ทั่วไป"}, {"code": "K024", "name": "หลอดดูดน้ำ (เล็ก)", "category": "ทั่วไป"}, {"code": "K025", "name": "หลอดดูดน้ำ (ใหญ่)", "category": "ทั่วไป"}, {"code": "K026", "name": "ที่ปิดรูปลั๊กไฟ", "category": "ทั่วไป"}, {"code": "K027", "name": "ตาปลอม (เล็ก)", "category": "ทั่วไป"}, {"code": "K028", "name": "ตาปลอม (ใหญ่)", "category": "ทั่วไป"}, {"code": "K029", "name": "ถุงใส่แพมเพิส", "category": "ทั่วไป"}, {"code": "K030", "name": "ทิชชู่เปียก", "category": "ทั่วไป"}, {"code": "K031", "name": "ทิชชู่แห้ง", "category": "ทั่วไป"}, {"code": "K032", "name": "สเปรย์แอลกอฮอล์", "category": "ทั่วไป"}, {"code": "K033", "name": "ไหมพรม", "category": "ทั่วไป"}, {"code": "K034", "name": "ลูกโป่ง บอลลูน", "category": "ทั่วไป"}, {"code": "K035", "name": "ถุงมือพลาสติก", "category": "ทั่วไป"}, {"code": "K036", "name": "แผ่นฟอยล์", "category": "ทั่วไป"}, {"code": "K037", "name": "ไม้จิ้มฟัน", "category": "ทั่วไป"}, {"code": "K038", "name": "ไม้ไอติม", "category": "ทั่วไป"}, {"code": "K039", "name": "ผ้าขาวบาง", "category": "ทั่วไป"}, {"code": "K040", "name": "ตากร้าของใช้เด็ก", "category": "ทั่วไป"}, {"code": "K041", "name": "เทียน", "category": "ทั่วไป"}, {"code": "K042", "name": "ลวดกำมะหยี่", "category": "ทั่วไป"}, {"code": "K043", "name": "ตีนตุ๊กแก", "category": "ทั่วไป"}];
-const TEACHERS=[{"id": 1, "name": "ครูแป้ง ", "room": "Mon 1"}, {"id": 2, "name": "ครูนุ่น", "room": "Mon 1"}, {"id": 3, "name": "ครูแน็ต", "room": "Mon 1"}, {"id": 4, "name": "ครูแอมป์", "room": "Mon 1"}, {"id": 5, "name": "ครูปาย", "room": "Mon 2"}, {"id": 6, "name": "ครููอุ้มอิ้ม", "room": "Mon 2"}, {"id": 7, "name": "ครูพลอย", "room": "Mon 2"}, {"id": 8, "name": "ครูทีน่า", "room": "Pre-Kinder"}, {"id": 9, "name": "ครูน้ำฝน", "room": "Pre-Kinder"}, {"id": 10, "name": "ครูอ้อม", "room": "Pre-Kinder"}, {"id": 11, "name": "ครูลีน่า", "room": "Kindergarten"}, {"id": 12, "name": "ครูขมิ้น", "room": "Kindergarten"}, {"id": 13, "name": "ครูเมฆ", "room": "Office"}, {"id": 14, "name": "ครูแป้ง ", "room": "Office"}, {"id": 15, "name": "ครูโบว์", "room": "Office"}, {"id": 16, "name": "ครูอุ้ย", "room": "กวดวิชา"}, {"id": 17, "name": "ครูแอร์", "room": "กวดวิชา"}, {"id": 18, "name": "ครูปอย", "room": "Chinese Teacher"}, {"id": 19, "name": "ครมะลิ", "room": "Me ศิลป์"}, {"id": 20, "name": "ครูนัท", "room": "Me ศิลป์"}];
-const icons={
-  "กระดาษแผ่นเล็ก":"📄",
-  "กระดาษแผ่นใหญ่":"📜",
-  "สก็อตเทป กาว":"🩹",
-  "แม็ก":"🖇️",
-  "ดินสอ ปากกา สี":"🖍️",
-  "คลิปหนีบกระดาษ":"📎",
-  "จาน ถ้วย":"🍽️",
-  "แก้วพลาสติก":"🥤",
-  "ซอง ใส้แฟ้ม":"📁",
-  "ทำความสะอาด":"🧹",
-  "ทั่วไป":"🧰"
-};
-const categories=[...new Set(STOCK.map(x=>x.category))];
-const $=id=>document.getElementById(id);
-const home=$("home"),itemsSection=$("itemsSection"),items=$("items"),search=$("search"),backBtn=$("backBtn"),overlay=$("overlay"),sheet=$("sheet");
-let currentCategory=null,selectedItem=null,workType="งานห้อง",qty=1;
-
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
-function renderCategories(){
-$("categories").innerHTML=categories.map((c,i)=>{
-const count=STOCK.filter(x=>x.category===c).length;
-return `<button class="cat" onclick='showCategory(${JSON.stringify(c)})'><div class="icon">${icons[c]||"📦"}</div><div class="name">${esc(c)}</div><div class="count">${count} รายการ</div></button>`;
-}).join("");
-}
-function showCategory(cat){currentCategory=cat;home.classList.add("hidden");itemsSection.classList.remove("hidden");backBtn.style.display="block";$("listTitle").textContent=cat;search.value="";renderItems();}
-function renderItems(){
-const q=search.value.trim().toLowerCase();
-const list=STOCK.filter(x=>(!currentCategory||x.category===currentCategory)&&(!q||x.name.toLowerCase().includes(q)||x.code.toLowerCase().includes(q)));
-items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-name">${esc(x.name)}</div><div class="item-code">รหัส: ${esc(x.code)}</div><div class="item-cat">${esc(x.category)}</div></div><button class="req" onclick='openForm(${JSON.stringify(x.code)})'>เบิก</button></div>`).join(""):`<div class="empty">ไม่พบรายการที่ค้นหา</div>`;
-}
-function renderItemsAll(q){
-const list=STOCK.filter(x=>x.name.toLowerCase().includes(q)||x.code.toLowerCase().includes(q));
-items.innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-main"><div class="item-name">${esc(x.name)}</div><div class="item-code">รหัส: ${esc(x.code)}</div><div class="item-cat">${esc(x.category)}</div></div><button class="req" onclick='openForm(${JSON.stringify(x.code)})'>เบิก</button></div>`).join(""):`<div class="empty">ไม่พบรายการที่ค้นหา</div>`;
-}
-function roomOptions(){
-  return `<option value="" selected disabled>เลือกห้องเรียน...</option>`+
-    [...new Set(TEACHERS.map(t=>t.room).filter(Boolean))]
-      .map(r=>`<option value="${esc(r)}">${esc(r)}</option>`)
-      .join("");
+:root{
+  --blue:#165a8a;
+  --blue2:#287db2;
+  --bg:#f4f7fa;
+  --card:#fff;
+  --text:#183247;
+  --muted:#71808d;
+  --line:#e4ebf1;
+  --green:#15945a;
 }
 
-function teacherOptions(){
-  const room=document.getElementById("room")?.value||"";
+*{box-sizing:border-box}
 
-  return `<option value="" selected disabled>เลือกผู้เบิก...</option>`+
-    TEACHERS
-      .filter(t=>t.room===room)
-      .map(t=>`<option value="${esc(t.id)}">${esc(t.name)} - ${esc(t.room)}</option>`)
-      .join("");
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;
+  background:var(--bg);
+  color:var(--text)
 }
-function openForm(code){selectedItem=STOCK.find(x=>x.code===code);qty=1;workType="งานห้อง";renderForm();overlay.classList.remove("hidden");}
-function renderForm(){
-sheet.innerHTML=`<div class="sheet-head"><div><h2>ยืนยันการเบิก</h2><div class="item-code">เลือกแล้ว: ${esc(selectedItem.name)}</div></div><button class="close" onclick="closeModal()">×</button></div>
-<div class="field"><div class="label">ประเภทงาน</div><div class="choice"><button class="${workType==="งานส่วนกลาง"?"active":""}" onclick="setWorkType('งานส่วนกลาง')">งานส่วนกลาง</button><button class="${workType==="งานห้อง"?"active":""}" onclick="setWorkType('งานห้อง')">งานห้อง</button></div></div>
-<div class="field"><div class="label">จำนวน</div><div class="qty"><button onclick="changeQty(-1)">−</button><input id="qtyInput" type="number" min="1" value="${qty}" onchange="setQty(this.value)"><button onclick="changeQty(1)">+</button></div></div>
-<div class="field"><div class="label">ห้อง</div><select id="room" onchange="changeRoom()">${roomOptions()}</select></div>
-<div class="field"><div class="label">ผู้เบิก</div><select id="teacher">${teacherOptions()}</select></div>
-<button class="confirm" onclick="confirmReq()">ยืนยันการเบิก</button>`;
-}
-function setWorkType(v){workType=v;renderForm()}
-function changeQty(n){qty=Math.max(1,qty+n);renderForm()}
-function setQty(v){qty=Math.max(1,parseInt(v||1));renderForm()}
-function changeRoom(){
-  const room=document.getElementById("room").value;
-  const teacher=document.getElementById("teacher");
 
-  if(teacher){
-    teacher.value="";
-    teacher.innerHTML=teacherOptions();
+.app{
+  max-width:760px;
+  margin:auto;
+  min-height:100vh
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:#fff;
+  padding:22px 18px 18px;
+  box-shadow:0 3px 15px #123b5525
+}
+
+.brand{
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:.5px
+}
+
+.subtitle{
+  opacity:.9;
+  font-size:14px;
+  margin-top:2px
+}
+
+.search{
+  margin-top:16px;
+  background:#fff;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  box-shadow:0 3px 12px #123b5520
+}
+
+.search span{
+  font-size:20px
+}
+
+.search input{
+  border:0;
+  outline:0;
+  width:100%;
+  padding:13px 10px;
+  color:var(--text);
+  background:transparent
+}
+
+.content{
+  padding:18px
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:800;
+  margin:4px 0 12px
+}
+
+.categories{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:11px
+}
+
+.cat{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 2px 8px #1832470b;
+  transition:.15s
+}
+
+.cat:hover{
+  transform:translateY(-1px);
+  box-shadow:0 5px 15px #18324714
+}
+
+.cat .icon{
+  font-size:26px
+}
+
+.cat .name{
+  font-weight:800;
+  margin-top:7px
+}
+
+.cat .count{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:3px
+}
+
+.back{
+  display:none;
+  border:0;
+  background:#fff;
+  border-radius:12px;
+  padding:9px 13px;
+  margin-bottom:12px;
+  cursor:pointer;
+  color:var(--blue);
+  font-weight:800
+}
+
+.list{
+  display:grid;
+  gap:10px
+}
+
+.item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+
+.item-main{
+  flex:1;
+  min-width:0
+}
+
+.item-name{
+  font-weight:750;
+  line-height:1.35
+}
+
+.item-code{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px
+}
+
+.item-cat{
+  font-size:11px;
+  color:var(--blue);
+  margin-top:3px
+}
+
+.req{
+  border:0;
+  background:var(--blue);
+  color:#fff;
+  border-radius:11px;
+  padding:10px 13px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap
+}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:35px 10px
+}
+
+.loading{
+  text-align:center;
+  color:var(--muted);
+  padding:35px 10px
+}
+
+.hidden{
+  display:none!important
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:#0b1e2d88;
+  z-index:30;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center
+}
+
+.sheet{
+  width:min(760px,100%);
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  padding:20px 18px 24px;
+  max-height:92vh;
+  overflow:auto
+}
+
+.sheet-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start
+}
+
+.sheet h2{
+  margin:0;
+  font-size:21px
+}
+
+.close{
+  border:0;
+  background:#eef3f7;
+  border-radius:50%;
+  width:36px;
+  height:36px;
+  cursor:pointer;
+  font-size:20px
+}
+
+.field{
+  margin-top:15px
+}
+
+.label{
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:7px
+}
+
+.choice{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px
+}
+
+.choice button{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:12px;
+  padding:12px;
+  font-weight:750;
+  cursor:pointer
+}
+
+.choice button.active{
+  border:2px solid var(--blue);
+  background:#eef7fd;
+  color:var(--blue)
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.qty button{
+  width:42px;
+  height:42px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#f5f7f9;
+  font-size:22px;
+  cursor:pointer
+}
+
+.qty input{
+  width:80px;
+  text-align:center;
+  height:42px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  outline:none
+}
+
+select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  outline:none
+}
+
+.confirm{
+  width:100%;
+  margin-top:20px;
+  border:0;
+  border-radius:13px;
+  background:var(--green);
+  color:#fff;
+  padding:14px;
+  font-weight:900;
+  font-size:16px;
+  cursor:pointer
+}
+
+.receipt{
+  padding:12px 2px 4px
+}
+
+.ok{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:#e6f8ef;
+  color:var(--green);
+  display:grid;
+  place-items:center;
+  font-size:30px;
+  margin:2px auto 10px
+}
+
+.receipt h2{
+  text-align:center;
+  margin:0
+}
+
+.receipt-sub{
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin:4px 0 15px
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  border-bottom:1px dashed #d7e0e7;
+  padding:10px 0;
+  font-size:14px
+}
+
+.row b{
+  text-align:right
+}
+
+.done{
+  width:100%;
+  border:0;
+  border-radius:13px;
+  background:var(--blue);
+  color:#fff;
+  padding:14px;
+  font-weight:900;
+  margin-top:18px;
+  cursor:pointer
+}
+
+.note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:14px;
+  text-align:center;
+  line-height:1.5
+}
+
+.sync{
+  text-align:center;
+  font-size:11px;
+  color:rgba(255,255,255,.8);
+  margin-top:8px
+}
+
+.refresh{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  background:#fff;
+  color:var(--blue);
+  padding:11px;
+  margin-bottom:14px;
+  font-weight:800;
+  cursor:pointer
+}
+
+.refresh:disabled{
+  opacity:.6;
+  cursor:wait
+}
+
+@media(min-width:650px){
+  .categories{
+    grid-template-columns:repeat(3,1fr)
   }
 }
-async function confirmReq(){
-  const teacher=TEACHERS.find(t=>String(t.id)===String($("teacher").value));
+</style>
+</head>
 
-if(!teacher){
-  alert("กรุณาเลือกผู้เบิกก่อนยืนยันการเบิก");
-  return;
+<body>
+
+<div class="app">
+
+<header class="header">
+
+  <div class="brand">KRUOOM</div>
+
+  <div class="subtitle">
+    ระบบเบิกพัสดุออนไลน์
+  </div>
+
+  <div class="search">
+    <span>⌕</span>
+    <input
+      id="search"
+      placeholder="ค้นหาพัสดุ..."
+      autocomplete="off"
+    >
+  </div>
+
+  <div class="sync" id="syncStatus">
+    กำลังเชื่อมต่อฐานข้อมูล...
+  </div>
+
+</header>
+
+<main class="content">
+
+  <button
+    class="refresh"
+    id="refreshBtn"
+    onclick="refreshData(true)"
+  >
+    🔄 รีเฟรชข้อมูลจาก Excel
+  </button>
+
+  <button
+    class="back"
+    id="backBtn"
+  >
+    ← กลับไปหมวดหมู่
+  </button>
+
+  <section id="home">
+
+    <div class="section-title">
+      เลือกหมวดหมู่
+    </div>
+
+    <div
+      class="categories"
+      id="categories"
+    >
+      <div class="loading">
+        กำลังโหลดข้อมูล...
+      </div>
+    </div>
+
+  </section>
+
+  <section
+    id="itemsSection"
+    class="hidden"
+  >
+
+    <div
+      class="section-title"
+      id="listTitle"
+    >
+      รายการพัสดุ
+    </div>
+
+    <div
+      class="list"
+      id="items"
+    ></div>
+
+  </section>
+
+  <div class="note">
+    ระบบเบิกพัสดุใช้แล้วหมดไป
+    <br>
+    Develop by Mekin
+  </div>
+
+</main>
+
+</div>
+
+<div
+  class="overlay hidden"
+  id="overlay"
+>
+  <div
+    class="sheet"
+    id="sheet"
+  ></div>
+</div>
+
+
+<script>
+
+/* ============================================================
+   API
+   ============================================================ */
+
+const API =
+  "https://kruoom-api.maykin6789.workers.dev";
+
+
+/* ============================================================
+   LIVE DATA
+   ============================================================ */
+
+let STOCK = [];
+let TEACHERS = [];
+let categories = [];
+
+
+/* ============================================================
+   ICONS
+   ============================================================ */
+
+const icons = {
+
+  "กระดาษแผ่นเล็ก":"📄",
+
+  "กระดาษแผ่นใหญ่":"📜",
+
+  "สก็อตเทป กาว":"🩹",
+
+  "แม็ก":"🖇️",
+
+  "ดินสอ ปากกา สี":"🖍️",
+
+  "คลิปหนีบกระดาษ":"📎",
+
+  "จาน ถ้วย":"🍽️",
+
+  "แก้วพลาสติก":"🥤",
+
+  "ซอง ใส้แฟ้ม":"📁",
+
+  "ทำความสะอาด":"🧹",
+
+  "ทั่วไป":"🧰"
+
+};
+
+
+/* ============================================================
+   DOM
+   ============================================================ */
+
+const $ =
+  id => document.getElementById(id);
+
+const home =
+  $("home");
+
+const itemsSection =
+  $("itemsSection");
+
+const items =
+  $("items");
+
+const search =
+  $("search");
+
+const backBtn =
+  $("backBtn");
+
+const overlay =
+  $("overlay");
+
+const sheet =
+  $("sheet");
+
+const syncStatus =
+  $("syncStatus");
+
+const refreshBtn =
+  $("refreshBtn");
+
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let currentCategory = null;
+
+let selectedItem = null;
+
+let workType = "งานห้อง";
+
+let qty = 1;
+
+
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+
+function esc(s){
+
+  return String(s ?? "")
+    .replace(
+      /[&<>"']/g,
+      m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[m])
+    );
+
 }
-  const room=$("room").value;
 
-  const confirmButton=document.querySelector(".confirm");
-  if(confirmButton){
-    confirmButton.disabled=true;
-    confirmButton.textContent="กำลังบันทึก...";
-    confirmButton.style.opacity=".65";
+
+/* ============================================================
+   LOAD TEACHERS FROM EXCEL
+   ============================================================ */
+
+async function loadTeachers(){
+
+  const response =
+    await fetch(
+      `${API}/api/teachers?_=${Date.now()}`,
+      {
+        method:"GET",
+        cache:"no-store",
+        headers:{
+          "Cache-Control":"no-cache"
+        }
+      }
+    );
+
+  if(!response.ok){
+
+    throw new Error(
+      "โหลดรายชื่อครูจาก Excel ไม่สำเร็จ"
+    );
+
+  }
+
+  const data =
+    await response.json();
+
+  if(!data.ok){
+
+    throw new Error(
+      data.error ||
+      "โหลดรายชื่อครูไม่สำเร็จ"
+    );
+
+  }
+
+  TEACHERS =
+    Array.isArray(data.teachers)
+      ? data.teachers
+      : [];
+
+}
+
+
+/* ============================================================
+   LOAD STOCK FROM EXCEL
+   ============================================================ */
+
+async function loadStock(){
+
+  const response =
+    await fetch(
+      `${API}/api/stock?_=${Date.now()}`,
+      {
+        method:"GET",
+        cache:"no-store",
+        headers:{
+          "Cache-Control":"no-cache"
+        }
+      }
+    );
+
+  if(!response.ok){
+
+    throw new Error(
+      "โหลดรายการ Stock จาก Excel ไม่สำเร็จ"
+    );
+
+  }
+
+  const data =
+    await response.json();
+
+  if(!data.ok){
+
+    throw new Error(
+      data.error ||
+      "โหลด Stock ไม่สำเร็จ"
+    );
+
+  }
+
+  STOCK =
+    Array.isArray(data.stock)
+      ? data.stock
+      : [];
+
+  categories =
+    [
+      ...new Set(
+        STOCK
+          .map(x => x.category)
+          .filter(Boolean)
+      )
+    ];
+
+}
+
+
+/* ============================================================
+   REFRESH ALL DATA
+   ============================================================ */
+
+async function refreshData(manual = false){
+
+  if(refreshBtn){
+
+    refreshBtn.disabled = true;
+
+    refreshBtn.textContent =
+      "⏳ กำลังอ่านข้อมูลจาก Excel...";
+
+  }
+
+  if(syncStatus){
+
+    syncStatus.textContent =
+      "กำลังอัปเดตข้อมูลจาก Excel...";
+
   }
 
   try{
-    const response=await fetch("https://kruoom-api.maykin6789.workers.dev/api/requisition",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        workType:workType,
-        itemCode:selectedItem.code,
-        itemName:selectedItem.name,
-        quantity:qty,
-        room:room,
-        teacher:teacher.name,
-        teacherId:String(teacher.id),
-        category:selectedItem.category,
-        note:""
-      })
-    });
 
-    const result=await response.json();
+    await Promise.all([
+      loadTeachers(),
+      loadStock()
+    ]);
 
-    if(!response.ok || !result.ok){
-      throw new Error(result.error || result.message || "ไม่สามารถบันทึกข้อมูลได้");
+    renderCategories();
+
+    if(currentCategory){
+
+      if(
+        categories.includes(
+          currentCategory
+        )
+      ){
+
+        renderItems();
+
+      }else{
+
+        currentCategory = null;
+
+        home.classList.remove("hidden");
+
+        itemsSection.classList.add("hidden");
+
+        backBtn.style.display = "none";
+
+      }
+
     }
 
-    sheet.innerHTML=`
-      <div class="receipt">
-        <div class="ok">✓</div>
-        <h2>เบิกพัสดุสำเร็จ</h2>
-        <div class="receipt-sub">บันทึกรายการลง Excel เรียบร้อยแล้ว</div>
+    if(
+      !overlay.classList.contains("hidden")
+    ){
 
-        <div class="row"><span>เลขที่รายการ</span><b>${esc(result.logId)}</b></div>
-        <div class="row"><span>เวลา</span><b>${esc(result.timestamp)}</b></div>
-        <div class="row"><span>ประเภทงาน</span><b>${esc(workType)}</b></div>
-        <div class="row"><span>รายการ</span><b>${esc(selectedItem.name)}</b></div>
-        <div class="row"><span>จำนวน</span><b>${qty}</b></div>
-        <div class="row"><span>ห้อง</span><b>${esc(room)}</b></div>
-        <div class="row"><span>ผู้เบิก</span><b>${esc(teacher.name)}</b></div>
+      if(selectedItem){
 
-        <button class="done" onclick="closeModal()">เสร็จสิ้น</button>
-        <div class="note">บันทึกข้อมูลลง Excel แล้ว • แถวที่ ${result.excelRow}</div>
-      </div>`;
+        const latest =
+          STOCK.find(
+            x =>
+              x.code === selectedItem.code
+          );
+
+        if(latest){
+
+          selectedItem = latest;
+
+          renderForm();
+
+        }else{
+
+          closeModal();
+
+        }
+
+      }
+
+    }
+
+    if(syncStatus){
+
+      const now =
+        new Date();
+
+      syncStatus.textContent =
+        "✓ ข้อมูลจาก Excel อัปเดตแล้ว • " +
+        now.toLocaleTimeString(
+          "th-TH",
+          {
+            hour:"2-digit",
+            minute:"2-digit"
+          }
+        );
+
+    }
 
   }catch(error){
+
+    console.error(
+      "LIVE EXCEL SYNC",
+      error
+    );
+
+    if(syncStatus){
+
+      syncStatus.textContent =
+        "⚠️ เชื่อมต่อ Excel ไม่สำเร็จ";
+
+    }
+
+    if(
+      STOCK.length === 0
+    ){
+
+      $("categories").innerHTML =
+        `<div class="empty">
+          ไม่สามารถโหลดข้อมูลพัสดุได้
+          <br><br>
+          ${esc(error.message)}
+        </div>`;
+
+    }
+
+    if(manual){
+
+      alert(
+        "อัปเดตข้อมูลไม่สำเร็จ\n\n" +
+        error.message
+      );
+
+    }
+
+  }finally{
+
+    if(refreshBtn){
+
+      refreshBtn.disabled = false;
+
+      refreshBtn.textContent =
+        "🔄 รีเฟรชข้อมูลจาก Excel";
+
+    }
+
+  }
+
+}
+
+
+/* ============================================================
+   CATEGORIES
+   ============================================================ */
+
+function renderCategories(){
+
+  $("categories").innerHTML =
+    categories.map(
+      c => {
+
+        const count =
+          STOCK.filter(
+            x =>
+              x.category === c
+          ).length;
+
+        return `
+          <button
+            class="cat"
+            onclick='showCategory(${JSON.stringify(c)})'
+          >
+
+            <div class="icon">
+              ${icons[c] || "📦"}
+            </div>
+
+            <div class="name">
+              ${esc(c)}
+            </div>
+
+            <div class="count">
+              ${count} รายการ
+            </div>
+
+          </button>
+        `;
+
+      }
+    ).join("") ||
+
+    `<div class="empty">
+      ยังไม่มีรายการพัสดุ
+    </div>`;
+
+}
+
+
+/* ============================================================
+   SHOW CATEGORY
+   ============================================================ */
+
+function showCategory(cat){
+
+  currentCategory = cat;
+
+  home.classList.add("hidden");
+
+  itemsSection.classList.remove("hidden");
+
+  backBtn.style.display =
+    "block";
+
+  $("listTitle").textContent =
+    cat;
+
+  search.value = "";
+
+  renderItems();
+
+}
+
+
+/* ============================================================
+   RENDER ITEMS
+   ============================================================ */
+
+function renderItems(){
+
+  const q =
+    search.value
+      .trim()
+      .toLowerCase();
+
+  const list =
+    STOCK.filter(
+      x =>
+        (
+          !currentCategory ||
+          x.category === currentCategory
+        )
+        &&
+        (
+          !q ||
+          String(x.name)
+            .toLowerCase()
+            .includes(q)
+          ||
+          String(x.code)
+            .toLowerCase()
+            .includes(q)
+        )
+    );
+
+  items.innerHTML =
+    list.length
+
+      ? list.map(
+          x => `
+
+            <div class="item">
+
+              <div class="item-main">
+
+                <div class="item-name">
+                  ${esc(x.name)}
+                </div>
+
+                <div class="item-code">
+                  รหัส: ${esc(x.code)}
+                </div>
+
+                <div class="item-cat">
+                  ${esc(x.category)}
+                </div>
+
+              </div>
+
+              <button
+                class="req"
+                onclick='openForm(${JSON.stringify(x.code)})'
+              >
+                เบิก
+              </button>
+
+            </div>
+
+          `
+        ).join("")
+
+      :
+
+        `<div class="empty">
+          ไม่พบรายการที่ค้นหา
+        </div>`;
+
+}
+
+
+/* ============================================================
+   SEARCH ALL
+   ============================================================ */
+
+function renderItemsAll(q){
+
+  const list =
+    STOCK.filter(
+      x =>
+        String(x.name)
+          .toLowerCase()
+          .includes(q)
+        ||
+        String(x.code)
+          .toLowerCase()
+          .includes(q)
+    );
+
+  items.innerHTML =
+    list.length
+
+      ? list.map(
+          x => `
+
+            <div class="item">
+
+              <div class="item-main">
+
+                <div class="item-name">
+                  ${esc(x.name)}
+                </div>
+
+                <div class="item-code">
+                  รหัส: ${esc(x.code)}
+                </div>
+
+                <div class="item-cat">
+                  ${esc(x.category)}
+                </div>
+
+              </div>
+
+              <button
+                class="req"
+                onclick='openForm(${JSON.stringify(x.code)})'
+              >
+                เบิก
+              </button>
+
+            </div>
+
+          `
+        ).join("")
+
+      :
+
+        `<div class="empty">
+          ไม่พบรายการที่ค้นหา
+        </div>`;
+
+}
+
+
+/* ============================================================
+   ROOM OPTIONS
+   ============================================================ */
+
+function roomOptions(){
+
+  return (
+
+    `<option
+      value=""
+      selected
+      disabled
+    >
+      เลือกห้องเรียน...
+    </option>`
+
+    +
+
+    [
+      ...new Set(
+        TEACHERS
+          .map(t => t.room)
+          .filter(Boolean)
+      )
+    ]
+
+      .map(
+        r =>
+          `<option value="${esc(r)}">
+            ${esc(r)}
+          </option>`
+      )
+
+      .join("")
+
+  );
+
+}
+
+
+/* ============================================================
+   TEACHER OPTIONS
+   ============================================================ */
+
+function teacherOptions(){
+
+  const room =
+    document
+      .getElementById("room")
+      ?.value || "";
+
+  return (
+
+    `<option
+      value=""
+      selected
+      disabled
+    >
+      เลือกผู้เบิก...
+    </option>`
+
+    +
+
+    TEACHERS
+
+      .filter(
+        t =>
+          String(t.room) ===
+          String(room)
+      )
+
+      .map(
+        t =>
+          `<option value="${esc(t.id)}">
+            ${esc(t.name)} - ${esc(t.room)}
+          </option>`
+      )
+
+      .join("")
+
+  );
+
+}
+
+
+/* ============================================================
+   OPEN FORM
+   ============================================================ */
+
+async function openForm(code){
+
+  /*
+   * ดึงข้อมูลล่าสุดก่อนเปิดฟอร์ม
+   * เพื่อไม่ให้ใช้รายการเก่าถ้า Excel เพิ่งถูกแก้
+   */
+
+  try{
+
+    await Promise.all([
+      loadTeachers(),
+      loadStock()
+    ]);
+
+  }catch(error){
+
+    console.warn(
+      "ไม่สามารถ refresh ก่อนเปิดฟอร์ม",
+      error
+    );
+
+  }
+
+  selectedItem =
+    STOCK.find(
+      x =>
+        String(x.code) ===
+        String(code)
+    );
+
+  if(!selectedItem){
+
+    alert(
+      "ไม่พบรายการพัสดุนี้ใน Excel แล้ว"
+    );
+
+    return;
+
+  }
+
+  qty = 1;
+
+  workType = "งานห้อง";
+
+  renderForm();
+
+  overlay.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+/* ============================================================
+   RENDER FORM
+   ============================================================ */
+
+function renderForm(){
+
+  if(!selectedItem){
+
+    closeModal();
+
+    return;
+
+  }
+
+  sheet.innerHTML = `
+
+    <div class="sheet-head">
+
+      <div>
+
+        <h2>
+          ยืนยันการเบิก
+        </h2>
+
+        <div class="item-code">
+          เลือกแล้ว:
+          ${esc(selectedItem.name)}
+        </div>
+
+      </div>
+
+      <button
+        class="close"
+        onclick="closeModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="field">
+
+      <div class="label">
+        ประเภทงาน
+      </div>
+
+      <div class="choice">
+
+        <button
+          class="${workType==="งานส่วนกลาง"?"active":""}"
+          onclick="setWorkType('งานส่วนกลาง')"
+        >
+          งานส่วนกลาง
+        </button>
+
+        <button
+          class="${workType==="งานห้อง"?"active":""}"
+          onclick="setWorkType('งานห้อง')"
+        >
+          งานห้อง
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="field">
+
+      <div class="label">
+        จำนวน
+      </div>
+
+      <div class="qty">
+
+        <button
+          onclick="changeQty(-1)"
+        >
+          −
+        </button>
+
+        <input
+          id="qtyInput"
+          type="number"
+          min="1"
+          value="${qty}"
+          onchange="setQty(this.value)"
+        >
+
+        <button
+          onclick="changeQty(1)"
+        >
+          +
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="field">
+
+      <div class="label">
+        ห้อง
+      </div>
+
+      <select
+        id="room"
+        onchange="changeRoom()"
+      >
+        ${roomOptions()}
+      </select>
+
+    </div>
+
+
+    <div class="field">
+
+      <div class="label">
+        ผู้เบิก
+      </div>
+
+      <select id="teacher">
+        ${teacherOptions()}
+      </select>
+
+    </div>
+
+
+    <button
+      class="confirm"
+      onclick="confirmReq()"
+    >
+      ยืนยันการเบิก
+    </button>
+
+  `;
+
+}
+
+
+/* ============================================================
+   WORK TYPE
+   ============================================================ */
+
+function setWorkType(v){
+
+  workType = v;
+
+  renderForm();
+
+}
+
+
+/* ============================================================
+   QUANTITY
+   ============================================================ */
+
+function changeQty(n){
+
+  qty =
+    Math.max(
+      1,
+      qty + n
+    );
+
+  renderForm();
+
+}
+
+
+function setQty(v){
+
+  qty =
+    Math.max(
+      1,
+      parseInt(v || 1)
+    );
+
+  renderForm();
+
+}
+
+
+/* ============================================================
+   CHANGE ROOM
+   ============================================================ */
+
+function changeRoom(){
+
+  const room =
+    document
+      .getElementById("room")
+      .value;
+
+  const teacher =
+    document
+      .getElementById("teacher");
+
+  if(teacher){
+
+    teacher.value = "";
+
+    teacher.innerHTML =
+      teacherOptions();
+
+  }
+
+}
+
+
+/* ============================================================
+   CONFIRM REQUISITION
+   ============================================================ */
+
+async function confirmReq(){
+
+  const teacher =
+    TEACHERS.find(
+      t =>
+        String(t.id) ===
+        String(
+          $("teacher").value
+        )
+    );
+
+  if(!teacher){
+
+    alert(
+      "กรุณาเลือกผู้เบิกก่อนยืนยันการเบิก"
+    );
+
+    return;
+
+  }
+
+  const room =
+    $("room").value;
+
+  const confirmButton =
+    document.querySelector(
+      ".confirm"
+    );
+
+  if(confirmButton){
+
+    confirmButton.disabled = true;
+
+    confirmButton.textContent =
+      "กำลังบันทึก...";
+
+    confirmButton.style.opacity =
+      ".65";
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/api/requisition`,
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              workType:
+                workType,
+
+              itemCode:
+                selectedItem.code,
+
+              itemName:
+                selectedItem.name,
+
+              quantity:
+                qty,
+
+              room:
+                room,
+
+              teacher:
+                teacher.name,
+
+              teacherId:
+                String(teacher.id),
+
+              category:
+                selectedItem.category,
+
+              note:""
+
+            })
+
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      !result.ok
+    ){
+
+      throw new Error(
+        result.error ||
+        result.message ||
+        "ไม่สามารถบันทึกข้อมูลได้"
+      );
+
+    }
+
+
+    sheet.innerHTML = `
+
+      <div class="receipt">
+
+        <div class="ok">
+          ✓
+        </div>
+
+        <h2>
+          เบิกพัสดุสำเร็จ
+        </h2>
+
+        <div class="receipt-sub">
+          บันทึกรายการลง Excel
+          เรียบร้อยแล้ว
+        </div>
+
+
+        <div class="row">
+          <span>
+            เลขที่รายการ
+          </span>
+          <b>
+            ${esc(result.logId)}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            เวลา
+          </span>
+          <b>
+            ${esc(result.timestamp)}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            ประเภทงาน
+          </span>
+          <b>
+            ${esc(workType)}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            รายการ
+          </span>
+          <b>
+            ${esc(selectedItem.name)}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            จำนวน
+          </span>
+          <b>
+            ${qty}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            ห้อง
+          </span>
+          <b>
+            ${esc(room)}
+          </b>
+        </div>
+
+
+        <div class="row">
+          <span>
+            ผู้เบิก
+          </span>
+          <b>
+            ${esc(teacher.name)}
+          </b>
+        </div>
+
+
+        <button
+          class="done"
+          onclick="closeModal()"
+        >
+          เสร็จสิ้น
+        </button>
+
+
+        <div class="note">
+          บันทึกข้อมูลลง Excel แล้ว
+          • แถวที่ ${result.excelRow}
+        </div>
+
+      </div>
+
+    `;
+
+
+    /*
+     * โหลด Stock ใหม่หลังเบิก
+     * เผื่อมีการเปลี่ยนข้อมูลใน Excel
+     */
+
+    setTimeout(
+      () => {
+        refreshData(false);
+      },
+      500
+    );
+
+
+  }catch(error){
+
     console.error(error);
 
-    sheet.innerHTML=`
+    sheet.innerHTML = `
+
       <div class="receipt">
-        <div class="ok" style="background:#fff0f0;color:#c62828">!</div>
-        <h2>บันทึกไม่สำเร็จ</h2>
-        <div class="receipt-sub">${esc(error.message)}</div>
-        <button class="done" onclick="renderForm()">ลองใหม่</button>
-      </div>`;
+
+        <div
+          class="ok"
+          style="
+            background:#fff0f0;
+            color:#c62828
+          "
+        >
+          !
+        </div>
+
+        <h2>
+          บันทึกไม่สำเร็จ
+        </h2>
+
+        <div class="receipt-sub">
+          ${esc(error.message)}
+        </div>
+
+        <button
+          class="done"
+          onclick="renderForm()"
+        >
+          ลองใหม่
+        </button>
+
+      </div>
+
+    `;
+
   }
+
 }
-function closeModal(){overlay.classList.add("hidden")}
-overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal()});
-backBtn.onclick=()=>{currentCategory=null;home.classList.remove("hidden");itemsSection.classList.add("hidden");backBtn.style.display="none";search.value="";renderCategories()};
-search.addEventListener("input",()=>{
-if(currentCategory)renderItems();else{const q=search.value.trim().toLowerCase();if(q){home.classList.add("hidden");itemsSection.classList.remove("hidden");backBtn.style.display="block";$("listTitle").textContent="ผลการค้นหา";renderItemsAll(q)}else{home.classList.remove("hidden");itemsSection.classList.add("hidden");backBtn.style.display="none"}}
-});
-renderCategories();
+
+
+/* ============================================================
+   CLOSE MODAL
+   ============================================================ */
+
+function closeModal(){
+
+  overlay.classList.add(
+    "hidden"
+  );
+
+  selectedItem = null;
+
+}
+
+
+/* ============================================================
+   OVERLAY CLICK
+   ============================================================ */
+
+overlay.addEventListener(
+  "click",
+  e => {
+
+    if(
+      e.target === overlay
+    ){
+
+      closeModal();
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   BACK
+   ============================================================ */
+
+backBtn.onclick = () => {
+
+  currentCategory = null;
+
+  home.classList.remove(
+    "hidden"
+  );
+
+  itemsSection.classList.add(
+    "hidden"
+  );
+
+  backBtn.style.display =
+    "none";
+
+  search.value = "";
+
+  renderCategories();
+
+};
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+search.addEventListener(
+  "input",
+  () => {
+
+    if(currentCategory){
+
+      renderItems();
+
+      return;
+
+    }
+
+    const q =
+      search.value
+        .trim()
+        .toLowerCase();
+
+    if(q){
+
+      home.classList.add(
+        "hidden"
+      );
+
+      itemsSection.classList.remove(
+        "hidden"
+      );
+
+      backBtn.style.display =
+        "block";
+
+      $("listTitle").textContent =
+        "ผลการค้นหา";
+
+      renderItemsAll(q);
+
+    }else{
+
+      home.classList.remove(
+        "hidden"
+      );
+
+      itemsSection.classList.add(
+        "hidden"
+      );
+
+      backBtn.style.display =
+        "none";
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   AUTO SYNC
+   ทุก 60 วินาที
+   ============================================================ */
+
+setInterval(
+  () => {
+
+    refreshData(false);
+
+  },
+  60000
+);
+
+
+/* ============================================================
+   FIRST LOAD
+   ============================================================ */
+
+refreshData(false);
+
 </script>
+
 </body>
 </html>
